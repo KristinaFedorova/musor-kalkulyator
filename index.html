@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Себестоимость куба</title>
+  <style>
+    :root {
+      --bg: #f3f1ec;
+      --paper: #fffcf7;
+      --ink: #1c1915;
+      --muted: #6b645c;
+      --line: #e4dfd6;
+      --accent: #1f6b4a;
+      --accent-soft: #e7f3ec;
+      --warn: #8a5a12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.4;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin: 0 0 8px;
+    }
+    .lede {
+      margin: 0 0 24px;
+      color: var(--muted);
+      max-width: 62ch;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px 18px 8px;
+    }
+    h2 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+    label span {
+      display: block;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      font: inherit;
+      font-size: 22px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+    .hint {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      vertical-align: baseline;
+    }
+    th {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.total td { font-weight: 600; border-bottom: none; }
+    .hero {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .card.accent { background: var(--accent-soft); border-color: #c9e4d4; }
+    .card .k {
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 6px;
+    }
+    .card .v {
+      font-size: 36px;
+      letter-spacing: -0.03em;
+      margin: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .card .s {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .note strong { color: var(--warn); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Себестоимость куба</h1>
+    <p class="lede">
+      Полигон зависит от категории. Без справки — среднее Новосергиевки и Янино за контейнер, делённое на его объём.
+      Со справкой — 1 200 ₽ за куб. Прочие расходы одинаковые на каждый куб.
+      Кран в кубы не входит.
+    </p>
+
+    <div class="grid">
+      <section>
+        <h2>Заказ</h2>
+        <label>
+          <span>14 м³ без справки, кубов</span>
+          <input id="c14" type="number" min="0" step="1" value="0" inputmode="decimal" />
+        </label>
+        <label>
+          <span>20 м³ без справки, кубов</span>
+          <input id="c20" type="number" min="0" step="1" value="0" inputmode="decimal" />
+        </label>
+        <label>
+          <span>27 м³ без справки, кубов</span>
+          <input id="c27" type="number" min="0" step="1" value="0" inputmode="decimal" />
+        </label>
+        <label>
+          <span>Со справкой, кубов</span>
+          <input id="cert" type="number" min="0" step="1" value="0" inputmode="decimal" />
+        </label>
+        <label>
+          <span>Кран, ₽</span>
+          <input id="crane" type="number" min="0" step="1" value="0" inputmode="decimal" />
+          <span class="hint">Добавляется к цене клиенту. Себестоимость куба не меняет: в P&L у крана нет отдельной затраты.</span>
+        </label>
+        <label>
+          <span>Наценка на 1 куб, ₽</span>
+          <input id="markup" type="number" min="0" step="0.01" value="127.94" inputmode="decimal" />
+          <span class="hint">По умолчанию чистая прибыль за 2 месяца / кубы. Можно заменить.</span>
+        </label>
+      </section>
+
+      <section>
+        <h2>Полигон</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Контейнер</th>
+              <th class="num">Новосергиевка</th>
+              <th class="num">Янино</th>
+              <th class="num">Среднее</th>
+              <th class="num">₽ / куб</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>14 м³</td>
+              <td class="num">12 500</td>
+              <td class="num">11 250</td>
+              <td class="num">11 875</td>
+              <td class="num">848,21</td>
+            </tr>
+            <tr>
+              <td>20 м³</td>
+              <td class="num">17 000</td>
+              <td class="num">16 250</td>
+              <td class="num">16 625</td>
+              <td class="num">831,25</td>
+            </tr>
+            <tr>
+              <td>27 м³</td>
+              <td class="num">18 500</td>
+              <td class="num">17 250</td>
+              <td class="num">17 875</td>
+              <td class="num">662,04</td>
+            </tr>
+            <tr class="total">
+              <td>Со справкой</td>
+              <td class="num"></td>
+              <td class="num"></td>
+              <td class="num"></td>
+              <td class="num">1 200,00</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="hint">Без справки: (Новосергиевка + Янино) / 2 / объём. Новосергиевка на скрине указана с НДС, у Янино пометки нет — в среднее взяты цифры как написаны. Полный контейнер сходится с ценой в рублях: 14 кубов × 11 875 / 14 = 11 875 ₽.</p>
+        <p class="hint">Плюс на каждый куб, любая категория: прочие переменные 554,14 ₽ и постоянные 269,00 ₽. Это март и апрель, 7 926 кубов, без старого среднего полигона.</p>
+      </section>
+    </div>
+
+    <div class="hero">
+      <div class="card">
+        <p class="k">Себестоимость 1 куба</p>
+        <p class="v" id="out-cost">—</p>
+        <p class="s" id="out-cost-sub">Зависит от состава заказа</p>
+      </div>
+      <div class="card accent">
+        <p class="k">Цена клиенту за 1 куб</p>
+        <p class="v" id="out-price">—</p>
+        <p class="s" id="out-price-sub">Себестоимость + наценка</p>
+      </div>
+    </div>
+
+    <section style="margin-top: 16px">
+      <h2>Заказ целиком</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Статья</th>
+            <th class="num">Расчёт</th>
+            <th class="num">Сумма, ₽</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Кубов в заказе</td><td class="num" id="sum-cubes-how"></td><td class="num" id="sum-cubes"></td></tr>
+          <tr><td>Полигон 14 м³</td><td class="num" id="sum-p14-how"></td><td class="num" id="sum-p14"></td></tr>
+          <tr><td>Полигон 20 м³</td><td class="num" id="sum-p20-how"></td><td class="num" id="sum-p20"></td></tr>
+          <tr><td>Полигон 27 м³</td><td class="num" id="sum-p27-how"></td><td class="num" id="sum-p27"></td></tr>
+          <tr><td>Полигон со справкой</td><td class="num" id="sum-pcert-how"></td><td class="num" id="sum-pcert"></td></tr>
+          <tr><td>Полигон итого</td><td class="num">сумма строк</td><td class="num" id="sum-polygon"></td></tr>
+          <tr><td>Прочие переменные</td><td class="num" id="sum-other-how"></td><td class="num" id="sum-other"></td></tr>
+          <tr><td>Постоянные</td><td class="num" id="sum-fixed-how"></td><td class="num" id="sum-fixed"></td></tr>
+          <tr class="total"><td>Себестоимость заказа</td><td class="num" id="sum-cost-how"></td><td class="num" id="sum-cost"></td></tr>
+          <tr><td>Наценка</td><td class="num" id="sum-markup-how"></td><td class="num" id="sum-markup"></td></tr>
+          <tr><td>Кран</td><td class="num">как введено</td><td class="num" id="sum-crane"></td></tr>
+          <tr class="total"><td>Цена клиенту</td><td class="num" id="sum-price-how"></td><td class="num" id="sum-price"></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <p class="note">
+      Себестоимость 1 куба заказа = все расходы заказа / все кубы заказа. У 14, 20 и 27 м³ она разная, потому что разный полигон.
+      Наценка по-прежнему 127,94 ₽ на куб и редактируется.
+    </p>
+  </main>
+  <script>
+    // Полигон без справки: среднее двух полигонов за контейнер, копейки.
+    // Сумма = кубы × цена контейнера / объём, один раз до копейки.
+    const POLY = {
+      14: { price: 1187500, volume: 14 },
+      20: { price: 1662500, volume: 20 },
+      27: { price: 1787500, volume: 27 }
+    };
+    const CERT_PER_CUBE = 120000; // 1 200,00 ₽
+    const OTHER = 55414; // 554,14 ₽
+    const FIXED = 26900; // 269,00 ₽
+
+    const money = new Intl.NumberFormat("ru-RU", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    const qty = new Intl.NumberFormat("ru-RU", {
+      maximumFractionDigits: 2
+    });
+
+    const rub = (kopecks) => money.format(kopecks / 100);
+    const num = (value) => {
+      const n = Number(value);
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    };
+    const polygonOf = (cubes, size) => {
+      const row = POLY[size];
+      return Math.round(cubes * row.price / row.volume);
+    };
+
+    function render() {
+      const n14 = num(c14.value);
+      const n20 = num(c20.value);
+      const n27 = num(c27.value);
+      const nCert = num(cert.value);
+      const cubes = n14 + n20 + n27 + nCert;
+      const crane = Math.round(num(craneInput.value) * 100);
+      const markup = Math.round(num(markupInput.value) * 100);
+
+      const p14 = polygonOf(n14, 14);
+      const p20 = polygonOf(n20, 20);
+      const p27 = polygonOf(n27, 27);
+      const pCert = Math.round(nCert * CERT_PER_CUBE);
+      const polygonSum = p14 + p20 + p27 + pCert;
+      const otherSum = Math.round(cubes * OTHER);
+      const fixedSum = Math.round(cubes * FIXED);
+      const costSum = polygonSum + otherSum + fixedSum;
+      const markupSum = Math.round(cubes * markup);
+      const priceSum = costSum + markupSum + crane;
+
+      const perCube = cubes > 0 ? Math.round(costSum / cubes) : 0;
+      const priceCube = cubes > 0 ? Math.round((costSum + markupSum) / cubes) : 0;
+
+      document.getElementById("out-cost").textContent = cubes > 0 ? rub(perCube) + " ₽" : "—";
+      document.getElementById("out-price").textContent = cubes > 0 ? rub(priceCube) + " ₽" : "—";
+      document.getElementById("out-cost-sub").textContent = cubes > 0
+        ? "Расходы заказа / " + qty.format(cubes) + " куб."
+        : "Зависит от состава заказа";
+      document.getElementById("out-price-sub").textContent = cubes > 0
+        ? rub(perCube) + " + " + rub(markup)
+        : "Себестоимость + наценка";
+
+      const howPoly = (cubesN, size) =>
+        qty.format(cubesN) + " × " + rub(POLY[size].price) + " / " + size;
+
+      document.getElementById("sum-cubes-how").textContent = "14 + 20 + 27 + справка";
+      document.getElementById("sum-cubes").textContent = qty.format(cubes);
+      document.getElementById("sum-p14-how").textContent = howPoly(n14, 14);
+      document.getElementById("sum-p14").textContent = rub(p14);
+      document.getElementById("sum-p20-how").textContent = howPoly(n20, 20);
+      document.getElementById("sum-p20").textContent = rub(p20);
+      document.getElementById("sum-p27-how").textContent = howPoly(n27, 27);
+      document.getElementById("sum-p27").textContent = rub(p27);
+      document.getElementById("sum-pcert-how").textContent = qty.format(nCert) + " × " + rub(CERT_PER_CUBE);
+      document.getElementById("sum-pcert").textContent = rub(pCert);
+      document.getElementById("sum-polygon").textContent = rub(polygonSum);
+      document.getElementById("sum-other-how").textContent = qty.format(cubes) + " × " + rub(OTHER);
+      document.getElementById("sum-other").textContent = rub(otherSum);
+      document.getElementById("sum-fixed-how").textContent = qty.format(cubes) + " × " + rub(FIXED);
+      document.getElementById("sum-fixed").textContent = rub(fixedSum);
+      document.getElementById("sum-cost-how").textContent = "полигон + переменные + постоянные";
+      document.getElementById("sum-cost").textContent = rub(costSum);
+      document.getElementById("sum-markup-how").textContent = qty.format(cubes) + " × " + rub(markup);
+      document.getElementById("sum-markup").textContent = rub(markupSum);
+      document.getElementById("sum-crane").textContent = rub(crane);
+      document.getElementById("sum-price-how").textContent = "кубы + кран";
+      document.getElementById("sum-price").textContent = rub(priceSum);
+    }
+
+    const c14 = document.getElementById("c14");
+    const c20 = document.getElementById("c20");
+    const c27 = document.getElementById("c27");
+    const cert = document.getElementById("cert");
+    const craneInput = document.getElementById("crane");
+    const markupInput = document.getElementById("markup");
+
+    for (const el of [c14, c20, c27, cert, craneInput, markupInput]) {
+      el.addEventListener("input", render);
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -70,7 +70,7 @@
       display: block;
       margin-bottom: 4px;
     }
-    input {
+    input[type="number"] {
       width: 100%;
       font: inherit;
       font-size: 22px;
@@ -80,7 +80,7 @@
       background: #fff;
       color: var(--ink);
     }
-    input:focus {
+    input[type="number"]:focus {
       outline: 2px solid var(--accent);
       border-color: transparent;
     }
@@ -121,18 +121,82 @@
       padding: 18px;
     }
     .card.accent { background: var(--accent-soft); border-color: #c9e4d4; }
-    .card .k {
+    .total-banner {
+      margin-top: 16px;
+      background: var(--ink);
+      color: #f7f4ee;
+      border-radius: 14px;
+      padding: 22px 20px;
+    }
+    .total-banner .k { color: #c8c2b8; }
+    .total-banner .s { color: #c8c2b8; }
+    .card .k, .total-banner .k {
       font-size: 13px;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
       margin: 0 0 6px;
     }
-    .card .v {
+    .card .v, .total-banner .v {
       font-size: 36px;
       letter-spacing: -0.03em;
       margin: 0;
       font-variant-numeric: tabular-nums;
+    }
+    .total-banner .v {
+      font-size: 64px;
+      line-height: 1;
+    }
+    .dist {
+      border: 0;
+      margin: 0 0 12px;
+      padding: 0;
+    }
+    .dist legend {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .dist-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .dist-grid label {
+      margin: 0;
+      font-size: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dist-grid input { width: 18px; height: 18px; margin: 0; }
+    .dist-grid label:has(input:checked) {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    @media (max-width: 760px) {
+      main { padding: 16px 14px 128px; }
+      h1 { font-size: 26px; }
+      .lede { display: none; }
+      .card .v { font-size: 28px; }
+      .total-banner {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        z-index: 5;
+        margin: 0;
+        padding: 12px 14px;
+      }
+      .total-banner .v { font-size: 40px; }
+      .total-banner .s { font-size: 12px; }
+      input[type="number"] { font-size: 18px; min-height: 48px; }
+      th, td { font-size: 14px; }
     }
     .card .s {
       margin: 6px 0 0;
@@ -153,8 +217,14 @@
     <p class="lede">
       Полигон зависит от категории. Без справки — среднее Новосергиевки и Янино за контейнер, делённое на его объём.
       Со справкой — 1 200 ₽ за куб. Прочие расходы одинаковые на каждый куб.
-      Кран в кубы не входит.
+      Кран и километраж от КАД в кубы не входят: это суммы к заказу.
     </p>
+
+    <div class="total-banner">
+      <p class="k">Цена заказа</p>
+      <p class="v" id="out-total">—</p>
+      <p class="s" id="out-total-sub">Кубы, наценка, кран и удалённость</p>
+    </div>
 
     <div class="grid">
       <section>
@@ -175,6 +245,18 @@
           <span>Со справкой, кубов</span>
           <input id="cert" type="number" min="0" step="1" value="0" inputmode="decimal" />
         </label>
+        <fieldset class="dist">
+          <legend>Удалённость от КАД</legend>
+          <div class="dist-grid">
+            <label><input type="radio" name="km" value="0" checked /> в пределах КАД</label>
+            <label><input type="radio" name="km" value="200000" /> 10 км · +2 000 ₽</label>
+            <label><input type="radio" name="km" value="250000" /> 20 км · +2 500 ₽</label>
+            <label><input type="radio" name="km" value="300000" /> 30 км · +3 000 ₽</label>
+            <label><input type="radio" name="km" value="400000" /> 40 км · +4 000 ₽</label>
+            <label><input type="radio" name="km" value="500000" /> 50 км · +5 000 ₽</label>
+          </div>
+          <span class="hint">Сумма добавляется к цене заказа один раз, не умножается на кубы.</span>
+        </fieldset>
         <label>
           <span>Кран, ₽</span>
           <input id="crane" type="number" min="0" step="1" value="0" inputmode="decimal" />
@@ -231,7 +313,7 @@
           </tbody>
         </table>
         <p class="hint">Без справки: (Новосергиевка + Янино) / 2 / объём. Новосергиевка на скрине указана с НДС, у Янино пометки нет — в среднее взяты цифры как написаны. Полный контейнер сходится с ценой в рублях: 14 кубов × 11 875 / 14 = 11 875 ₽.</p>
-        <p class="hint">Плюс на каждый куб, любая категория: прочие переменные 554,14 ₽ и постоянные 269,00 ₽. Это март и апрель, 7 926 кубов, без старого среднего полигона.</p>
+        <p class="hint">На каждый куб, любая категория: зарплата водителя 178,87 ₽, транспорт 173,29 ₽ (топливо, ремонты, ЗСД и Платон, стоянка, доставка), остальные переменные 201,98 ₽, постоянные 269,00 ₽. Сумма переменных без полигона прежняя: 554,14 ₽. База — март и апрель, 7 926 кубов.</p>
       </section>
     </div>
 
@@ -250,6 +332,7 @@
 
     <section style="margin-top: 16px">
       <h2>Заказ целиком</h2>
+      <div class="table-wrap">
       <table>
         <thead>
           <tr>
@@ -265,14 +348,18 @@
           <tr><td>Полигон 27 м³</td><td class="num" id="sum-p27-how"></td><td class="num" id="sum-p27"></td></tr>
           <tr><td>Полигон со справкой</td><td class="num" id="sum-pcert-how"></td><td class="num" id="sum-pcert"></td></tr>
           <tr><td>Полигон итого</td><td class="num">сумма строк</td><td class="num" id="sum-polygon"></td></tr>
-          <tr><td>Прочие переменные</td><td class="num" id="sum-other-how"></td><td class="num" id="sum-other"></td></tr>
+          <tr><td>Зарплата водителя</td><td class="num" id="sum-driver-how"></td><td class="num" id="sum-driver"></td></tr>
+          <tr><td>Транспорт</td><td class="num" id="sum-transport-how"></td><td class="num" id="sum-transport"></td></tr>
+          <tr><td>Остальные переменные</td><td class="num" id="sum-rest-how"></td><td class="num" id="sum-rest"></td></tr>
           <tr><td>Постоянные</td><td class="num" id="sum-fixed-how"></td><td class="num" id="sum-fixed"></td></tr>
           <tr class="total"><td>Себестоимость заказа</td><td class="num" id="sum-cost-how"></td><td class="num" id="sum-cost"></td></tr>
           <tr><td>Наценка</td><td class="num" id="sum-markup-how"></td><td class="num" id="sum-markup"></td></tr>
           <tr><td>Кран</td><td class="num">как введено</td><td class="num" id="sum-crane"></td></tr>
-          <tr class="total"><td>Цена клиенту</td><td class="num" id="sum-price-how"></td><td class="num" id="sum-price"></td></tr>
+          <tr><td>Удалённость от КАД</td><td class="num" id="sum-km-how"></td><td class="num" id="sum-km"></td></tr>
+          <tr class="total"><td>Цена заказа</td><td class="num" id="sum-price-how"></td><td class="num" id="sum-price"></td></tr>
         </tbody>
       </table>
+      </div>
     </section>
 
     <p class="note">
@@ -289,7 +376,9 @@
       27: { price: 1787500, volume: 27 }
     };
     const CERT_PER_CUBE = 120000; // 1 200,00 ₽
-    const OTHER = 55414; // 554,14 ₽
+    const DRIVER = 17887; // 178,87 ₽ зарплата водителей / 7 926 кубов
+    const TRANSPORT = 17329; // 173,29 ₽ топливо, ремонты, ЗСД и Платон, стоянка, доставка
+    const REST = 20198; // 201,98 ₽ логист, грузчики, помощники, банк, штрафы, прочее
     const FIXED = 26900; // 269,00 ₽
 
     const money = new Intl.NumberFormat("ru-RU", {
@@ -318,17 +407,21 @@
       const cubes = n14 + n20 + n27 + nCert;
       const crane = Math.round(num(craneInput.value) * 100);
       const markup = Math.round(num(markupInput.value) * 100);
+      const kmInput = document.querySelector('input[name="km"]:checked');
+      const distance = kmInput ? Number(kmInput.value) : 0;
 
       const p14 = polygonOf(n14, 14);
       const p20 = polygonOf(n20, 20);
       const p27 = polygonOf(n27, 27);
       const pCert = Math.round(nCert * CERT_PER_CUBE);
       const polygonSum = p14 + p20 + p27 + pCert;
-      const otherSum = Math.round(cubes * OTHER);
+      const driverSum = Math.round(cubes * DRIVER);
+      const transportSum = Math.round(cubes * TRANSPORT);
+      const restSum = Math.round(cubes * REST);
       const fixedSum = Math.round(cubes * FIXED);
-      const costSum = polygonSum + otherSum + fixedSum;
+      const costSum = polygonSum + driverSum + transportSum + restSum + fixedSum;
       const markupSum = Math.round(cubes * markup);
-      const priceSum = costSum + markupSum + crane;
+      const priceSum = costSum + markupSum + crane + distance;
 
       const perCube = cubes > 0 ? Math.round(costSum / cubes) : 0;
       const priceCube = cubes > 0 ? Math.round((costSum + markupSum) / cubes) : 0;
@@ -339,8 +432,12 @@
         ? "Расходы заказа / " + qty.format(cubes) + " куб."
         : "Зависит от состава заказа";
       document.getElementById("out-price-sub").textContent = cubes > 0
-        ? rub(perCube) + " + " + rub(markup)
+        ? rub(perCube) + " + " + rub(markup) + ". Удалённость в куб не входит"
         : "Себестоимость + наценка";
+      document.getElementById("out-total").textContent = rub(priceSum) + " ₽";
+      document.getElementById("out-total-sub").textContent =
+        "Себестоимость " + rub(costSum) + " + наценка " + rub(markupSum) +
+        " + кран " + rub(crane) + " + КАД " + rub(distance);
 
       const howPoly = (cubesN, size) =>
         qty.format(cubesN) + " × " + rub(POLY[size].price) + " / " + size;
@@ -356,16 +453,22 @@
       document.getElementById("sum-pcert-how").textContent = qty.format(nCert) + " × " + rub(CERT_PER_CUBE);
       document.getElementById("sum-pcert").textContent = rub(pCert);
       document.getElementById("sum-polygon").textContent = rub(polygonSum);
-      document.getElementById("sum-other-how").textContent = qty.format(cubes) + " × " + rub(OTHER);
-      document.getElementById("sum-other").textContent = rub(otherSum);
+      document.getElementById("sum-driver-how").textContent = qty.format(cubes) + " × " + rub(DRIVER);
+      document.getElementById("sum-driver").textContent = rub(driverSum);
+      document.getElementById("sum-transport-how").textContent = qty.format(cubes) + " × " + rub(TRANSPORT);
+      document.getElementById("sum-transport").textContent = rub(transportSum);
+      document.getElementById("sum-rest-how").textContent = qty.format(cubes) + " × " + rub(REST);
+      document.getElementById("sum-rest").textContent = rub(restSum);
       document.getElementById("sum-fixed-how").textContent = qty.format(cubes) + " × " + rub(FIXED);
       document.getElementById("sum-fixed").textContent = rub(fixedSum);
-      document.getElementById("sum-cost-how").textContent = "полигон + переменные + постоянные";
+      document.getElementById("sum-cost-how").textContent = "полигон + водитель + транспорт + остальные + постоянные";
       document.getElementById("sum-cost").textContent = rub(costSum);
       document.getElementById("sum-markup-how").textContent = qty.format(cubes) + " × " + rub(markup);
       document.getElementById("sum-markup").textContent = rub(markupSum);
       document.getElementById("sum-crane").textContent = rub(crane);
-      document.getElementById("sum-price-how").textContent = "кубы + кран";
+      document.getElementById("sum-km-how").textContent = "за рейс, не за куб";
+      document.getElementById("sum-km").textContent = rub(distance);
+      document.getElementById("sum-price-how").textContent = "кубы + кран + КАД";
       document.getElementById("sum-price").textContent = rub(priceSum);
     }
 
@@ -378,6 +481,9 @@
 
     for (const el of [c14, c20, c27, cert, craneInput, markupInput]) {
       el.addEventListener("input", render);
+    }
+    for (const el of document.querySelectorAll('input[name="km"]')) {
+      el.addEventListener("change", render);
     }
     render();
   </script>
